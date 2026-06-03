@@ -320,7 +320,7 @@ Para instalar dependencias:
 pip install -r requirements.txt
 ```
 
-Si `requirements.txt` solo contiene `pytest`, también puede instalarse manualmente:
+Como `requirements.txt` solo contiene `pytest`, también puede instalarse manualmente:
 
 ```bash
 pip install pytest
