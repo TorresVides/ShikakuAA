@@ -5,25 +5,46 @@ class SolucionadorShikaku:
         self.tablero = tablero
         self.candidatos = tablero.candidatos_todas_pistas()
         self.solucion = []
+
         self.llamadas_recursivas = 0
         self.rectangulos_probados = 0
+
+        self.estados_fallidos = set()
+        self.estados_memoizados = 0
+        self.podas_memoizacion = 0
+
+        self.mascara_total = (1 << (self.tablero.filas * self.tablero.cols)) - 1
 
     def resolver(self):
         self.solucion = []
 
-        if self._backtracking(0, []):
+        self.llamadas_recursivas = 0
+        self.rectangulos_probados = 0
+        self.estados_fallidos = set()
+        self.estados_memoizados = 0
+        self.podas_memoizacion = 0
+
+        if self._backtracking(0, [], 0):
             return self.solucion
 
         return None
 
-    def _backtracking(self, indice, seleccionados):
+    def _backtracking(self, indice, seleccionados, mascara_ocupada):
         self.llamadas_recursivas += 1
 
+        estado = (indice, mascara_ocupada)
+
+        if estado in self.estados_fallidos:
+            self.podas_memoizacion += 1
+            return False
+
         if indice == len(self.candidatos):
-            if self.cubre_todo_tablero(seleccionados):
+            if mascara_ocupada == self.mascara_total:
                 self.solucion = list(seleccionados)
                 return True
 
+            self.estados_fallidos.add(estado)
+            self.estados_memoizados = len(self.estados_fallidos)
             return False
 
         fila, col, valor, candidatos = self.candidatos[indice]
@@ -31,15 +52,31 @@ class SolucionadorShikaku:
         for rectangulo in candidatos:
             self.rectangulos_probados += 1
 
-            if self.no_solapa(rectangulo, seleccionados):
+            mascara_rectangulo = self.obtener_mascara_rectangulo(rectangulo)
+
+            if mascara_ocupada & mascara_rectangulo == 0:
                 seleccionados.append(rectangulo)
 
-                if self._backtracking(indice + 1, seleccionados):
+                nueva_mascara = mascara_ocupada | mascara_rectangulo
+
+                if self._backtracking(indice + 1, seleccionados, nueva_mascara):
                     return True
 
                 seleccionados.pop()
 
+        self.estados_fallidos.add(estado)
+        self.estados_memoizados = len(self.estados_fallidos)
+
         return False
+
+    def obtener_mascara_rectangulo(self, rectangulo):
+        mascara = 0
+
+        for fila, col in rectangulo.ocupadas():
+            indice = fila * self.tablero.cols + col
+            mascara = mascara | (1 << indice)
+
+        return mascara
 
     def no_solapa(self, rectangulo, seleccionados):
         for otro in seleccionados:
