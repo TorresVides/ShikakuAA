@@ -72,6 +72,10 @@ class InterfazShikaku:
         print("Llamadas recursivas:", solucionador.llamadas_recursivas)
         print("Rectángulos probados:", solucionador.rectangulos_probados)
         print("Memoria pico:", round(memoria_pico / 1024, 4), "KB")
+        print("Llamadas recursivas:", solucionador.llamadas_recursivas)
+        print("Rectángulos probados:", solucionador.rectangulos_probados)
+        print("Estados memoizados:", solucionador.estados_memoizados)
+        print("Podas por memoización:", solucionador.podas_memoizacion)
 
     def jugar_manual(self):
 
